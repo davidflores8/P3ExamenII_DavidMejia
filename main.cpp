@@ -9,10 +9,18 @@ using std::endl;
 #include <string>
 using std::string;
 
+#include <fstream>
+using std::ofstream;
+
+#include <ncurses.h>
+
 void PreOrden(NodoArbol*, string, vector<NodoArbol*>&);
 void agregarMayor(NodoArbol*&, NodoArbol*);
 void agregar(NodoArbol*&, vector<NodoArbol*>&);
 NodoArbol* crearMilitar(string);
+void guardarArchivo(string,NodoArbol*);
+void guardarRaiz(NodoArbol*, ofstream&);
+void ordenNCurses(NodoArbol*);
 
 
 
@@ -36,13 +44,120 @@ int main(){
                     string fileName;
                     cout<<"Ingrese el nombre del archivo para guardar su partida: "<<endl;
                     cin>>fileName;
+                    guardarArchivo(fileName, raiz);
+
+                    initscr();
+                    start_color();
+                    keypad(stdscr,TRUE);
+                    init_pair(1,COLOR_GREEN,COLOR_WHITE);
+                    init_pair(2,COLOR_GREEN,COLOR_BLACK);
+                    init_pair(3,COLOR_BLACK,COLOR_WHITE);
+                    init_pair(4,COLOR_BLUE,COLOR_RED);
+                    init_pair(5,COLOR_BLUE,COLOR_WHITE);
+                    attron(COLOR_PAIR(1));
+                    bkgd(COLOR_PAIR(1));
+                    refresh();
+                    ordenNCurses(raiz);
+                    int tecla = 97;
+                    noecho();
+                    while(tecla!=120){
+                    if (tecla == 110){
+                        attron(COLOR_PAIR(2));
+                        bkgd(COLOR_PAIR(2));
+                    }
+                    if (tecla == 105){
+                        attron(COLOR_PAIR(3));
+                        bkgd(COLOR_PAIR(3));
+                    }
+                    if (tecla == 99){
+                        attron(COLOR_PAIR(4));
+                        bkgd(COLOR_PAIR(4));
+                    }
+                    if(tecla == 108){
+                        attron(COLOR_PAIR(5));
+                        bkgd(COLOR_PAIR(5));
+                    }
+                    tecla = getch();
+                    refresh();
+                } 
+                endwin();
             }
+            break;
         }
     }
 
 
     return 0;
 }
+
+void ordenNCurses(NodoArbol* nodo){
+    if (nodo->getMilitar()->getRango() == "Coronel"){
+        printw("   ");
+    }
+    if (nodo->getMilitar()->getRango() == "Mayor"){
+        printw("       ");
+    }
+    if (nodo->getMilitar()->getRango() == "Capitan"){
+        printw("           ");
+    }
+    if (nodo->getMilitar()->getRango() == "Teniente"){
+        printw("               ");
+    }
+    if (nodo->getMilitar()->getRango() == "Sargento"){
+        printw("                   ");
+    }
+    if (nodo->getMilitar()->getRango() == "Cabo"){
+        printw("                       ");
+    }
+    if (nodo->getMilitar()->getRango() == "Soldado"){
+        printw("                           ");
+    }
+    printw("%s\n",nodo->toString().c_str());
+    for (int i = 0; i< nodo->getNodos_hijos().size();i++){
+        ordenNCurses(nodo->getNodos_hijos().at(i));
+    }
+}
+
+
+void guardarRaiz(NodoArbol*nodo, ofstream &file){
+    if (nodo->getMilitar()->getRango() == "Coronel"){
+        file << "   ";
+    }
+    if (nodo->getMilitar()->getRango() == "Mayor"){
+        file << "       ";
+    }
+    if (nodo->getMilitar()->getRango() == "Capitan"){
+        file << "           ";
+    }
+    if (nodo->getMilitar()->getRango() == "Teniente"){
+        file << "               ";
+    }
+    if (nodo->getMilitar()->getRango() == "Sargento"){
+        file << "                   ";
+    }
+    if (nodo->getMilitar()->getRango() == "Cabo"){
+        file << "                       ";
+    }
+    if (nodo->getMilitar()->getRango() == "Soldado"){
+        file << "                           ";
+    }
+    file << nodo->toString()<<endl;
+
+    for (int i = 0; i < nodo->getNodos_hijos().size();i++){
+        guardarRaiz(nodo->getNodos_hijos().at(i),file);
+    }
+}
+
+void guardarArchivo(string fileName,NodoArbol* raiz){
+    ofstream file;
+    string ruta= "Listados/";
+    ruta+=fileName;
+    ruta+=".txt";
+    file.open(ruta);
+    guardarRaiz(raiz,file);
+    file.close();
+}
+
 
 void printNode(NodoArbol* raiz){
     cout<<raiz->toString()<<endl;
